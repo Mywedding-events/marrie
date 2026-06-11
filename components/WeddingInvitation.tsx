@@ -14,6 +14,16 @@ const slides = [
   "/uploads/IMG_0223.JPEG",
 ];
 
+const slideChromeColors = [
+  "#2e5882",
+  "#294f7b",
+  "#31537c",
+  "#335a84",
+  "#245081",
+  "#204e81",
+  "#355983",
+];
+
 const sections = [
   "Welcome",
   "Invitation",
@@ -126,10 +136,12 @@ function ButtonLink({
 
 function RsvpButton({
   label,
+  variant,
   active,
   onClick,
 }: {
   label: string;
+  variant: "accept" | "decline";
   active: boolean;
   onClick: () => void;
 }) {
@@ -137,7 +149,9 @@ function RsvpButton({
     <button
       className={`inline-flex min-w-[82px] cursor-pointer items-center justify-center rounded-[2px] border px-[13px] py-[9px] font-serif-wedding text-xs uppercase tracking-[0.08em] transition duration-300 active:scale-95 ${
         active
-          ? "border-transparent bg-[rgba(252,246,238,0.92)] font-semibold text-[#4a3220]"
+          ? variant === "accept"
+            ? "border-transparent bg-[oklch(0.82_0.075_78/0.9)] font-semibold text-[#3a2615]"
+            : "border-transparent bg-[rgba(252,246,238,0.92)] font-semibold text-[#4a3220]"
           : "border-[var(--gold-line)] bg-white/[0.04] text-[var(--ink)] hover:border-[var(--ink)] hover:bg-white/[0.14]"
       }`}
       type="button"
@@ -148,7 +162,47 @@ function RsvpButton({
   );
 }
 
+const STARTUP_TIMEOUT_MS = 6000;
+
+function waitForWindowLoad(signal: AbortSignal) {
+  if (document.readyState === "complete") return Promise.resolve();
+
+  return new Promise<void>((resolve) => {
+    const done = () => resolve();
+    window.addEventListener("load", done, { once: true, signal });
+  });
+}
+
+function waitForStylesheet(link: HTMLLinkElement, signal: AbortSignal) {
+  if (link.sheet) return Promise.resolve();
+
+  return new Promise<void>((resolve) => {
+    const done = () => resolve();
+    link.addEventListener("load", done, { once: true, signal });
+    link.addEventListener("error", done, { once: true, signal });
+  });
+}
+
+async function waitForPageAssets(signal: AbortSignal) {
+  const stylesheetLinks = Array.from(
+    document.querySelectorAll<HTMLLinkElement>('link[rel~="stylesheet"]'),
+  );
+  const ready = async () => {
+    await Promise.all([
+      waitForWindowLoad(signal),
+      ...stylesheetLinks.map((link) => waitForStylesheet(link, signal)),
+    ]);
+    if ("fonts" in document) await document.fonts.ready;
+  };
+  const timeout = new Promise<void>((resolve) =>
+    window.setTimeout(resolve, STARTUP_TIMEOUT_MS),
+  );
+
+  await Promise.race([ready(), timeout]);
+}
+
 export default function WeddingInvitation() {
+  const [appReady, setAppReady] = useState(false);
   const [activeSlide, setActiveSlide] = useState(0);
   const [countdown, setCountdown] = useState<Countdown>({
     days: "00",
@@ -171,6 +225,22 @@ export default function WeddingInvitation() {
   );
 
   useEffect(() => {
+    const controller = new AbortController();
+
+    waitForPageAssets(controller.signal)
+      .catch(() => undefined)
+      .then(() => {
+        if (controller.signal.aborted) return;
+        document.body.style.visibility = "visible";
+        setAppReady(true);
+      });
+
+    return () => controller.abort();
+  }, []);
+
+  useEffect(() => {
+    if (!appReady) return;
+
     const slideTimer = window.setInterval(() => {
       setActiveSlide((index) => (index + 1) % slides.length);
     }, 3000);
@@ -184,9 +254,26 @@ export default function WeddingInvitation() {
       window.clearInterval(slideTimer);
       window.clearInterval(countdownTimer);
     };
-  }, []);
+  }, [appReady]);
 
   useEffect(() => {
+    if (!appReady) return;
+
+    const chromeColor =
+      slideChromeColors[activeSlide] ?? slideChromeColors[0] ?? "#241710";
+    const themeColorMeta =
+      document.querySelector<HTMLMetaElement>('meta[name="theme-color"]') ??
+      document.head.appendChild(document.createElement("meta"));
+
+    themeColorMeta.name = "theme-color";
+    themeColorMeta.content = chromeColor;
+    document.documentElement.style.backgroundColor = chromeColor;
+    document.body.style.backgroundColor = chromeColor;
+  }, [activeSlide, appReady]);
+
+  useEffect(() => {
+    if (!appReady) return;
+
     const reducedMotion = window.matchMedia(
       "(prefers-reduced-motion: reduce)",
     ).matches;
@@ -383,7 +470,7 @@ export default function WeddingInvitation() {
       window.clearTimeout(firstFallback);
       window.clearTimeout(secondFallback);
     };
-  }, [sectionIds]);
+  }, [appReady, sectionIds]);
 
   const selectRsvp = (guest: string, value: "accept" | "decline") => {
     setRsvps((current) => ({ ...current, [guest]: value }));
@@ -422,12 +509,12 @@ export default function WeddingInvitation() {
           data-screen-label="01 Welcome"
         >
           <div className="w-full max-w-[430px]">
-            <Reveal className="text-shadow-wedding text-[13px] font-medium uppercase tracking-[0.42em] text-[var(--ink-soft)]">
-              Together with their families
-            </Reveal>
             <h1 className="reveal text-shadow-wedding font-script my-[0.12em] pb-[0.08em] text-[clamp(58px,16vw,88px)] leading-[1.08] text-[var(--ink)]">
               Joe &amp; Elissa
             </h1>
+            <p className="reveal text-shadow-wedding font-serif-wedding text-[clamp(22px,6vw,30px)] italic leading-tight text-(--ink)">
+              Are getting married!
+            </p>
             <div className="wedding-rule reveal" />
             <p className="reveal text-shadow-wedding text-[15px] uppercase tracking-[0.18em] text-[var(--ink-soft)]">
               Sunday · August 16 · 2026
@@ -497,8 +584,12 @@ export default function WeddingInvitation() {
               — Matthew 19:6 —
             </p>
             <div className="wedding-rule reveal" />
-            <p className="reveal text-shadow-wedding text-[clamp(18px,4.8vw,21px)] leading-[1.75] text-[var(--ink)]">
-              Joe &amp; Elissa
+            <p className="reveal text-shadow-wedding font-script text-[clamp(42px,11vw,58px)] leading-[1.05] text-(--ink)">
+              Joe Sawaya 
+              <br />
+              &amp; 
+              <br />
+              Elissa Haddad
             </p>
             <p className="reveal text-shadow-wedding text-[clamp(18px,4.8vw,21px)] font-semibold leading-[1.75] text-[var(--ink)]">
               Together with our families
@@ -506,9 +597,6 @@ export default function WeddingInvitation() {
             <p className="reveal text-shadow-wedding text-[clamp(18px,4.8vw,21px)] leading-[1.75] text-[var(--ink)]">
               Joyfully invite you to celebrate our big day.
             </p>
-            <h2 className="reveal text-shadow-wedding font-script my-[0.18em] mb-[0.55em] text-[clamp(48px,13vw,72px)] leading-[1.08] text-[var(--ink)]">
-              Joe &amp; Elissa
-            </h2>
             <p className="reveal text-shadow-wedding text-[clamp(18px,4.8vw,21px)] leading-[1.75] text-[var(--ink)]">
               Sunday, 16 August 2026
             </p>
@@ -530,7 +618,10 @@ export default function WeddingInvitation() {
               5:30 PM
             </p>
             <LocationIcon className="reveal mx-auto mt-[30px] block text-[var(--ink)] drop-shadow-[0_2px_8px_rgba(30,18,10,0.45)]" />
-            <p className="reveal text-shadow-wedding mt-1 text-[clamp(18px,4.8vw,21px)] font-semibold leading-[1.75] text-[var(--ink)]">
+            <p className="reveal text-shadow-wedding mt-1 text-[clamp(18px,4.8vw,21px)] font-semibold leading-[1.75] text-(--ink)">
+              St. Mary Greek Melkite
+            </p>
+            <p className="reveal text-shadow-wedding text-[clamp(18px,4.8vw,21px)] font-semibold leading-[1.75] text-[var(--ink)]">
               Saydet Al Intikal Church
             </p>
             <p className="reveal text-shadow-wedding text-[clamp(18px,4.8vw,21px)] leading-[1.75] text-[var(--ink)]">
@@ -538,7 +629,7 @@ export default function WeddingInvitation() {
             </p>
             <ButtonLink
               className="reveal mt-[22px]"
-              href="https://www.google.com/maps/search/?api=1&query=Saydet+Al+Intikal+Church+Achrafieh"
+              href="https://maps.app.goo.gl/RJ5sp6SmUA84HkZ27?g_st=iw"
             >
               Church Location
             </ButtonLink>
@@ -568,32 +659,36 @@ export default function WeddingInvitation() {
               Gift Registry
             </h2>
             <div className="wedding-rule reveal" />
-            <p className="reveal text-shadow-wedding text-[clamp(18px,4.8vw,21px)] italic leading-[1.75] text-[var(--ink-soft)]">
-              Your presence is enough of a present to us! For those who desire,
-              a registry is available at:
-            </p>
-            <div className="reveal mt-[30px] text-shadow-wedding">
-              <div className="mb-2 text-[22px] font-semibold tracking-[0.06em] text-[var(--ink)]">
-                UAE Emirates NBD
+            <div className="reveal relative overflow-hidden rounded-[3px] border border-[var(--gold-line)] bg-[rgba(76,49,33,0.42)] px-6 py-7 shadow-[0_16px_48px_rgba(24,14,8,0.3)] backdrop-blur-[2px] before:pointer-events-none before:absolute before:inset-[6px] before:border before:border-[rgba(252,246,238,0.16)]">
+              <p className="relative text-shadow-wedding text-[clamp(18px,4.8vw,21px)] italic leading-[1.75] text-[var(--ink)]">
+                Your presence is enough of a present to us!
+                <br />
+                For those who desire, a registry is available at:
+              </p>
+              <div className="wedding-rule relative my-5" />
+              <div className="relative text-shadow-wedding">
+                <div className="mb-2 text-[22px] font-semibold tracking-[0.06em] text-[var(--ink)]">
+                  UAE Emirates NBD
+                </div>
+                <p className="text-[17px] leading-8 tracking-[0.04em] text-[var(--ink)]">
+                  Joe Antoine Sawaya
+                </p>
+                <p className="text-[17px] leading-8 tracking-[0.04em] text-[var(--ink)]">
+                  Ac #0125846129002
+                </p>
+                <p className="text-[17px] leading-8 tracking-[0.04em] text-[var(--ink)]">
+                  IBAN AE10 0260 0001 2584 6129 002
+                </p>
               </div>
-              <p className="text-[17px] leading-8 tracking-[0.04em] text-[var(--ink-soft)]">
-                Joe Antoine Sawaya
-              </p>
-              <p className="text-[17px] leading-8 tracking-[0.04em] text-[var(--ink-soft)]">
-                Ac #0125846129002
-              </p>
-              <p className="text-[17px] leading-8 tracking-[0.04em] text-[var(--ink-soft)]">
-                IBAN AE10 0260 0001 2584 6129 002
-              </p>
-            </div>
-            <div className="wedding-diamond reveal my-6" />
-            <div className="reveal text-shadow-wedding">
-              <div className="mb-2 text-[22px] font-semibold tracking-[0.06em] text-[var(--ink)]">
-                Whish Money
+              <div className="wedding-diamond relative my-6" />
+              <div className="relative text-shadow-wedding">
+                <div className="mb-2 text-[22px] font-semibold tracking-[0.06em] text-[var(--ink)]">
+                  Whish Money
+                </div>
+                <p className="whitespace-pre-line text-[17px] leading-8 tracking-[0.04em] text-[var(--ink)]">
+                  Account ID: 10218001-03{`\n`}Phone number: +971 558951417
+                </p>
               </div>
-              <p className="whitespace-pre-line text-[17px] leading-8 tracking-[0.04em] text-[var(--ink-soft)]">
-                Account ID: 10218001-03{`\n`}Phone number: +971 558951417
-              </p>
             </div>
           </div>
         </section>
@@ -608,7 +703,7 @@ export default function WeddingInvitation() {
               Kindly RSVP
             </h2>
             <p className="reveal text-shadow-wedding mt-1.5 text-[15px] tracking-[0.14em] text-[var(--ink-soft)]">
-              Please confirm by July 15, 2026
+              Please confirm by July 1, 2026
             </p>
             <div className="wedding-rule reveal" />
             <p className="reveal text-shadow-wedding my-1.5 mb-[18px] text-[17px] tracking-[0.04em] text-[var(--ink-soft)]">
@@ -627,11 +722,13 @@ export default function WeddingInvitation() {
                   <div className="flex gap-2">
                     <RsvpButton
                       label="Accept"
+                      variant="accept"
                       active={rsvps[guest] === "accept"}
                       onClick={() => selectRsvp(guest, "accept")}
                     />
                     <RsvpButton
                       label="Decline"
+                      variant="decline"
                       active={rsvps[guest] === "decline"}
                       onClick={() => selectRsvp(guest, "decline")}
                     />
@@ -649,7 +746,7 @@ export default function WeddingInvitation() {
             <p
               className={`text-shadow-wedding mt-5 min-h-6 text-lg italic text-[var(--gold)] transition-opacity duration-500 ${confirmed ? "opacity-100" : "opacity-0"}`}
             >
-              Thank you — your response has been noted ♡
+              Thank you. Your response has been noted ♡
             </p>
           </div>
         </section>
@@ -660,20 +757,8 @@ export default function WeddingInvitation() {
           data-screen-label="06 Together"
         >
           <div className="flex w-full max-w-[430px] flex-col items-center">
-            <div className="reveal w-[min(78vw,320px)] rotate-[-4deg] rounded bg-[#fdfcfa] px-4 pt-4 shadow-[0_30px_60px_rgba(20,12,6,0.55),0_6px_18px_rgba(20,12,6,0.4)]">
-              <Image
-                src="/uploads/IMG_0233.JPEG"
-                alt="Joe and Elissa"
-                width={640}
-                height={680}
-                className="block h-[340px] w-full rounded-[2px] object-cover object-[center_25%]"
-              />
-              <div className="px-1.5 py-[18px] pb-[22px] text-center font-serif-wedding text-[21px] italic text-[#43342a]">
-                ♡ Together forever ♡
-              </div>
-            </div>
-            <h2 className="reveal text-shadow-wedding font-script mt-9 text-[clamp(46px,13vw,62px)] leading-[1.04] text-[var(--ink)]">
-              See you there
+            <h2 className="reveal text-shadow-wedding font-script text-[clamp(46px,13vw,62px)] leading-[1.04] text-[var(--ink)]">
+              See you there!
             </h2>
           </div>
         </section>
