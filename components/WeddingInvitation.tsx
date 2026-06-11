@@ -650,7 +650,7 @@ export default function WeddingInvitation() {
             </p>
             <ButtonLink
               className="reveal mt-[18px]"
-              href="https://www.google.com/maps/search/?api=1&query=Jardin+De+Stone+Lebanon"
+              href="https://maps.app.goo.gl/xQmbzGiBLydWD1DK9?g_st=iw"
             >
               Venue Location
             </ButtonLink>
