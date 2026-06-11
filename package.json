@@ -9,16 +9,20 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@tailwindcss/postcss": "latest",
+    "@tailwindcss/postcss": "4.1.17",
     "next": "16.2.7",
-    "react": "latest",
-    "react-dom": "latest",
-    "tailwindcss": "latest"
+    "react": "19.2.7",
+    "react-dom": "19.2.7",
+    "tailwindcss": "4.1.17"
   },
   "devDependencies": {
-    "@types/node": "latest",
-    "@types/react": "latest",
-    "@types/react-dom": "latest",
-    "typescript": "latest"
+    "@types/node": "24.10.1",
+    "@types/react": "19.2.6",
+    "@types/react-dom": "19.2.3",
+    "typescript": "6.0.3"
+  },
+  "packageManager": "npm@11.4.2",
+  "engines": {
+    "node": ">=20.9.0"
   }
 }
