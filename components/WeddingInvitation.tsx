@@ -592,18 +592,18 @@ export default function WeddingInvitation() {
               — Matthew 19:6 —
             </p>
             <div className="wedding-rule reveal" />
-            <p className="reveal text-shadow-wedding text-[clamp(18px,4.8vw,21px)] font-semibold leading-[1.75] text-[var(--ink)]">
-              Together with our families
-            </p>
-            <p className="reveal text-shadow-wedding mt-3 font-script text-[clamp(42px,11vw,58px)] leading-[1.05] text-(--ink)">
+            <p className="reveal text-shadow-wedding font-script text-[clamp(42px,11vw,58px)] leading-[1.05] text-(--ink)">
               Joe Sawaya 
               <br />
               &amp; 
               <br />
               Elissa Haddad
             </p>
+            <p className="reveal text-shadow-wedding text-[clamp(18px,4.8vw,21px)] font-semibold leading-[1.75] text-[var(--ink)]">
+              Together with their families
+            </p>
             <p className="reveal text-shadow-wedding text-[clamp(18px,4.8vw,21px)] leading-[1.75] text-[var(--ink)]">
-              Joyfully invite you to celebrate our big day.
+              Joyfully invite you to celebrate with them <br /> Their Big Day.
             </p>
             <p className="reveal text-shadow-wedding text-[clamp(18px,4.8vw,21px)] leading-[1.75] text-[var(--ink)]">
               Sunday, 16 August 2026
@@ -623,7 +623,7 @@ export default function WeddingInvitation() {
             <div className="wedding-rule reveal" />
             <CalendarIcon className="reveal mx-auto block text-[var(--ink)] drop-shadow-[0_2px_8px_rgba(30,18,10,0.45)]" />
             <p className="reveal text-shadow-wedding mt-1.5 text-[clamp(18px,4.8vw,21px)] leading-[1.75] tracking-[0.04em] text-[var(--ink)]">
-              5:30 PM
+            August 16 · 5:30 PM
             </p>
             <LocationIcon className="reveal mx-auto mt-[30px] block text-[var(--ink)] drop-shadow-[0_2px_8px_rgba(30,18,10,0.45)]" />
             <p className="reveal text-shadow-wedding mt-1 text-[clamp(18px,4.8vw,21px)] font-semibold leading-[1.75] text-(--ink)">
