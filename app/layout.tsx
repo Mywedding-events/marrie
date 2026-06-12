@@ -2,10 +2,25 @@ import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 import "./globals.css";
 
+const coverImage = "/uploads/IMG_0234.JPEG";
+
 export const metadata: Metadata = {
   title: "Joe & Elissa - Wedding Invitation",
   description:
     "Wedding invitation for Joe and Elissa on Sunday, August 16, 2026.",
+  openGraph: {
+    title: "Joe & Elissa - Wedding Invitation",
+    description:
+      "Wedding invitation for Joe and Elissa on Sunday, August 16, 2026.",
+    images: [coverImage],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Joe & Elissa - Wedding Invitation",
+    description:
+      "Wedding invitation for Joe and Elissa on Sunday, August 16, 2026.",
+    images: [coverImage],
+  },
 };
 
 export const viewport: Viewport = {

@@ -4,8 +4,10 @@ import Image from "next/image";
 import type { ReactNode } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 
+const coverImage = "/uploads/IMG_0234.JPEG";
+
 const slides = [
-  "/uploads/IMG_0234.JPEG",
+  coverImage,
   "/uploads/IMG_0233.JPEG",
   "/uploads/IMG_0236.JPEG",
   "/uploads/IMG_0235.JPEG",
