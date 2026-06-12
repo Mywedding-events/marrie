@@ -54,7 +54,7 @@ type InvitationResponse = {
   invitees?: Invitee[];
 };
 
-const API_BASE_URL = "http://localhost:8080";
+const API_BASE_URL = "https://api.mywedding.events";
 
 function getCountdown(): Countdown {
   const remaining = Math.max(weddingDate - Date.now(), 0);
