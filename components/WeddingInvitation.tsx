@@ -755,43 +755,43 @@ export default function WeddingInvitation({
 
         <section
           id={sectionIds[2]}
-          className="flex min-h-svh flex-col items-center justify-center px-7 pb-[120px] pt-24 text-center"
+          className="flex min-h-svh flex-col items-center justify-center px-7 py-12 text-center min-[390px]:pb-[120px] min-[390px]:pt-24 max-[380px]:px-5 max-[380px]:py-8 max-[380px]:min-h-dvh"
           data-screen-label="03 Ceremony"
         >
-          <div className="w-full max-w-[430px]">
-            <h2 className="reveal text-shadow-wedding font-script text-[clamp(46px,13vw,64px)] leading-[1.04] text-[var(--ink)]">
+          <div className="flex w-full max-w-[430px] flex-col items-center">
+            <h2 className="reveal text-shadow-wedding font-script text-[clamp(42px,12vw,64px)] leading-[1.04] text-(--ink)">
               Wedding Ceremony
             </h2>
-            <div className="wedding-rule reveal" />
-            <CalendarIcon className="reveal mx-auto block text-[var(--ink)] drop-shadow-[0_2px_8px_rgba(30,18,10,0.45)]" />
-            <p className="reveal text-shadow-wedding mt-1.5 text-[clamp(18px,4.8vw,21px)] leading-[1.75] tracking-[0.04em] text-[var(--ink)]">
-            August 16 · 5:30 PM
+            <div className="wedding-rule reveal my-4 max-[380px]:my-3" />
+            <CalendarIcon className="reveal mx-auto block h-9 w-9 text-(--ink) drop-shadow-[0_2px_8px_rgba(30,18,10,0.45)] min-[390px]:h-10 min-[390px]:w-10" />
+            <p className="reveal text-shadow-wedding mt-1 text-[clamp(17px,4.6vw,21px)] leading-[1.55] tracking-[0.04em] text-(--ink) min-[390px]:mt-1.5 min-[390px]:leading-[1.75]">
+              August 16 · 5:30 PM
             </p>
-            <LocationIcon className="reveal mx-auto mt-[30px] block text-[var(--ink)] drop-shadow-[0_2px_8px_rgba(30,18,10,0.45)]" />
-            <p className="reveal text-shadow-wedding mt-1 text-[clamp(18px,4.8vw,21px)] font-semibold leading-[1.75] text-(--ink)">
+            <LocationIcon className="reveal mx-auto mt-5 block h-10 w-9 text-(--ink) drop-shadow-[0_2px_8px_rgba(30,18,10,0.45)] min-[390px]:mt-[30px] min-[390px]:h-11 min-[390px]:w-10" />
+            <p className="reveal text-shadow-wedding mt-1 text-[clamp(17px,4.6vw,21px)] font-semibold leading-[1.55] text-(--ink) min-[390px]:leading-[1.75]">
               St. Mary Greek Melkite
             </p>
-            <p className="reveal text-shadow-wedding text-[clamp(18px,4.8vw,21px)] font-semibold leading-[1.75] text-[var(--ink)]">
+            <p className="reveal text-shadow-wedding text-[clamp(17px,4.6vw,21px)] font-semibold leading-[1.55] text-(--ink) min-[390px]:leading-[1.75]">
               Saydet Al Intikal Church
             </p>
-            <p className="reveal text-shadow-wedding text-[clamp(18px,4.8vw,21px)] leading-[1.75] text-[var(--ink)]">
+            <p className="reveal text-shadow-wedding text-[clamp(17px,4.6vw,21px)] leading-[1.55] text-(--ink) min-[390px]:leading-[1.75]">
               Achrafieh
             </p>
             <ButtonLink
-              className="reveal mt-[22px]"
+              className="reveal mt-4 max-[380px]:px-5 max-[380px]:py-[11px] max-[380px]:text-sm min-[390px]:mt-[22px]"
               href="https://maps.app.goo.gl/RJ5sp6SmUA84HkZ27?g_st=iw"
             >
               Church Location
             </ButtonLink>
-            <div className="wedding-rule reveal" />
-            <p className="reveal text-shadow-wedding text-[clamp(18px,4.8vw,21px)] italic leading-[1.75] text-[var(--ink-soft)]">
+            <div className="wedding-rule reveal my-4 max-[380px]:my-3" />
+            <p className="reveal text-shadow-wedding text-[clamp(17px,4.6vw,21px)] italic leading-[1.55] text-(--ink-soft) min-[390px]:leading-[1.75]">
               Followed by Reception &amp; Dinner
             </p>
-            <p className="reveal text-shadow-wedding mt-3.5 text-[clamp(18px,4.8vw,21px)] font-semibold leading-[1.75] text-[var(--ink)]">
+            <p className="reveal text-shadow-wedding mt-2.5 text-[clamp(17px,4.6vw,21px)] font-semibold leading-[1.55] text-(--ink) min-[390px]:mt-3.5 min-[390px]:leading-[1.75]">
               Jardin De Stone
             </p>
             <ButtonLink
-              className="reveal mt-[18px]"
+              className="reveal mt-4 max-[380px]:px-5 max-[380px]:py-[11px] max-[380px]:text-sm min-[390px]:mt-[18px]"
               href="https://maps.app.goo.gl/xQmbzGiBLydWD1DK9?g_st=iw"
             >
               Venue Location
@@ -801,41 +801,41 @@ export default function WeddingInvitation({
 
         <section
           id={sectionIds[3]}
-          className="flex min-h-svh flex-col items-center justify-center px-7 pb-[120px] pt-24 text-center"
+          className="flex min-h-svh flex-col items-center justify-center px-7 py-12 text-center min-[390px]:pb-[120px] min-[390px]:pt-24 max-[380px]:px-5 max-[380px]:py-8 max-[380px]:min-h-dvh"
           data-screen-label="04 Registry"
         >
-          <div className="w-full max-w-[430px]">
-            <h2 className="reveal text-shadow-wedding font-script text-[clamp(46px,13vw,64px)] leading-[1.04] text-[var(--ink)]">
+          <div className="flex w-full max-w-[430px] flex-col items-center">
+            <h2 className="reveal text-shadow-wedding font-script text-[clamp(42px,12vw,64px)] leading-[1.04] text-(--ink)">
               Gift Registry
             </h2>
-            <div className="wedding-rule reveal" />
-            <div className="reveal relative overflow-hidden rounded-[3px] border border-[var(--gold-line)] bg-[rgba(76,49,33,0.42)] px-6 py-7 shadow-[0_16px_48px_rgba(24,14,8,0.3)] backdrop-blur-[2px] before:pointer-events-none before:absolute before:inset-[6px] before:border before:border-[rgba(252,246,238,0.16)]">
-              <p className="relative text-shadow-wedding text-[clamp(18px,4.8vw,21px)] italic leading-[1.75] text-[var(--ink)]">
+            <div className="wedding-rule reveal my-4 max-[380px]:my-3" />
+            <div className="reveal relative w-full overflow-hidden rounded-[3px] border border-(--gold-line) bg-[rgba(76,49,33,0.42)] px-5 py-6 shadow-[0_16px_48px_rgba(24,14,8,0.3)] backdrop-blur-[2px] before:pointer-events-none before:absolute before:inset-[6px] before:border before:border-[rgba(252,246,238,0.16)] min-[390px]:px-6 min-[390px]:py-7 max-[380px]:px-4 max-[380px]:py-5">
+              <p className="relative text-shadow-wedding text-[clamp(17px,4.6vw,21px)] italic leading-[1.55] text-(--ink) min-[390px]:leading-[1.75]">
                 Your presence is enough of a present to us!
                 <br />
                 For those who desire, a registry is available at:
               </p>
-              <div className="wedding-rule relative my-5" />
+              <div className="wedding-rule relative my-4 min-[390px]:my-5" />
               <div className="relative text-shadow-wedding">
-                <div className="mb-2 text-[22px] font-semibold tracking-[0.06em] text-[var(--ink)]">
+                <div className="mb-1.5 text-[clamp(19px,5vw,22px)] font-semibold tracking-[0.06em] text-(--ink) min-[390px]:mb-2">
                   UAE Emirates NBD
                 </div>
-                <p className="text-[17px] leading-8 tracking-[0.04em] text-[var(--ink)]">
+                <p className="text-[clamp(15px,4vw,17px)] leading-7 tracking-[0.04em] text-(--ink) min-[390px]:leading-8">
                   Joe Antoine Sawaya
                 </p>
-                <p className="text-[17px] leading-8 tracking-[0.04em] text-[var(--ink)]">
+                <p className="text-[clamp(15px,4vw,17px)] leading-7 tracking-[0.04em] text-(--ink) min-[390px]:leading-8">
                   Ac #0125846129002
                 </p>
-                <p className="text-[17px] leading-8 tracking-[0.04em] text-[var(--ink)]">
+                <p className="text-[clamp(15px,4vw,17px)] leading-7 tracking-[0.04em] text-(--ink) min-[390px]:leading-8">
                   IBAN AE10 0260 0001 2584 6129 002
                 </p>
               </div>
-              <div className="wedding-diamond relative my-6" />
+              <div className="wedding-diamond relative my-5 min-[390px]:my-6" />
               <div className="relative text-shadow-wedding">
-                <div className="mb-2 text-[22px] font-semibold tracking-[0.06em] text-[var(--ink)]">
+                <div className="mb-1.5 text-[clamp(19px,5vw,22px)] font-semibold tracking-[0.06em] text-(--ink) min-[390px]:mb-2">
                   Whish Money
                 </div>
-                <p className="whitespace-pre-line text-[17px] leading-8 tracking-[0.04em] text-[var(--ink)]">
+                <p className="whitespace-pre-line text-[clamp(15px,4vw,17px)] leading-7 tracking-[0.04em] text-(--ink) min-[390px]:leading-8">
                   Account ID: 10218001-03{`\n`}Phone number: +971 558951417
                 </p>
               </div>
