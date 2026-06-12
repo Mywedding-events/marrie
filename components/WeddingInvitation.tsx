@@ -41,6 +41,21 @@ type Countdown = {
   secs: string;
 };
 
+type RsvpStatus = "pending" | "accepted" | "rejected";
+
+type Invitee = {
+  id: string;
+  fullName?: string;
+  status?: RsvpStatus;
+};
+
+type InvitationResponse = {
+  invitationCode?: string;
+  invitees?: Invitee[];
+};
+
+const API_BASE_URL = "http://localhost:8080";
+
 function getCountdown(): Countdown {
   const remaining = Math.max(weddingDate - Date.now(), 0);
   const totalSeconds = Math.floor(remaining / 1000);
@@ -201,7 +216,11 @@ async function waitForPageAssets(signal: AbortSignal) {
   await Promise.race([ready(), timeout]);
 }
 
-export default function WeddingInvitation() {
+export default function WeddingInvitation({
+  invitationCode,
+}: {
+  invitationCode?: string;
+}) {
   const [appReady, setAppReady] = useState(false);
   const [activeSlide, setActiveSlide] = useState(0);
   const [countdown, setCountdown] = useState<Countdown>({
@@ -212,9 +231,12 @@ export default function WeddingInvitation() {
   });
   const [activeSection, setActiveSection] = useState(0);
   const [cueHidden, setCueHidden] = useState(false);
-  const [rsvps, setRsvps] = useState<
-    Record<string, "accept" | "decline" | undefined>
-  >({});
+  const [invitees, setInvitees] = useState<Invitee[]>([]);
+  const [rsvps, setRsvps] = useState<Record<string, RsvpStatus>>({});
+  const [invitationLoading, setInvitationLoading] = useState(false);
+  const [invitationError, setInvitationError] = useState("");
+  const [submittingRsvp, setSubmittingRsvp] = useState(false);
+  const [rsvpError, setRsvpError] = useState("");
   const [confirmed, setConfirmed] = useState(false);
   const lockRef = useRef(false);
   const currentRef = useRef(0);
@@ -225,6 +247,7 @@ export default function WeddingInvitation() {
   );
   const activeChromeColor =
     slideChromeColors[activeSlide] ?? slideChromeColors[0] ?? "#2e5882";
+  const normalizedInvitationCode = invitationCode?.trim();
 
   useEffect(() => {
     const controller = new AbortController();
@@ -476,8 +499,125 @@ export default function WeddingInvitation() {
     };
   }, [appReady, sectionIds]);
 
-  const selectRsvp = (guest: string, value: "accept" | "decline") => {
-    setRsvps((current) => ({ ...current, [guest]: value }));
+  useEffect(() => {
+    if (!normalizedInvitationCode) {
+      setInvitees([]);
+      setRsvps({});
+      setInvitationError("");
+      setConfirmed(false);
+      return;
+    }
+
+    const controller = new AbortController();
+
+    setInvitationLoading(true);
+    setInvitationError("");
+    setRsvpError("");
+    setConfirmed(false);
+
+    fetch(
+      `${API_BASE_URL}/api/invitations/${encodeURIComponent(
+        normalizedInvitationCode,
+      )}`,
+      { signal: controller.signal },
+    )
+      .then(async (response) => {
+        if (!response.ok) {
+          const fallbackMessage = `Invitation code "${normalizedInvitationCode}" was not found.`;
+          const errorBody = (await response
+            .json()
+            .catch(() => undefined)) as { message?: string } | undefined;
+          throw new Error(errorBody?.message ?? fallbackMessage);
+        }
+
+        return response.json() as Promise<InvitationResponse>;
+      })
+      .then((invitation) => {
+        const fetchedInvitees = invitation.invitees ?? [];
+        setInvitees(fetchedInvitees);
+        setRsvps(
+          Object.fromEntries(
+            fetchedInvitees.map((invitee) => [
+              invitee.id,
+              invitee.status ?? "pending",
+            ]),
+          ),
+        );
+      })
+      .catch((error: unknown) => {
+        if (controller.signal.aborted) return;
+        setInvitees([]);
+        setRsvps({});
+        setInvitationError(
+          error instanceof Error
+            ? error.message
+            : "Unable to load this invitation.",
+        );
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setInvitationLoading(false);
+      });
+
+    return () => controller.abort();
+  }, [normalizedInvitationCode]);
+
+  const selectRsvp = (inviteeId: string, value: RsvpStatus) => {
+    setConfirmed(false);
+    setRsvpError("");
+    setRsvps((current) => ({ ...current, [inviteeId]: value }));
+  };
+
+  const submitRsvps = async () => {
+    if (!normalizedInvitationCode || invitees.length === 0) return;
+
+    setSubmittingRsvp(true);
+    setConfirmed(false);
+    setRsvpError("");
+
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/api/invitations/${encodeURIComponent(
+          normalizedInvitationCode,
+        )}/rsvp`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            invitees: invitees.map((invitee) => ({
+              inviteeId: invitee.id,
+              status: rsvps[invitee.id] ?? "pending",
+            })),
+          }),
+        },
+      );
+
+      if (!response.ok) {
+        const errorBody = (await response.json().catch(() => undefined)) as
+          | { message?: string }
+          | undefined;
+        throw new Error(errorBody?.message ?? "Unable to submit your RSVP.");
+      }
+
+      const updatedInvitation =
+        (await response.json()) as InvitationResponse;
+      const updatedInvitees = updatedInvitation.invitees ?? invitees;
+      setInvitees(updatedInvitees);
+      setRsvps(
+        Object.fromEntries(
+          updatedInvitees.map((invitee) => [
+            invitee.id,
+            invitee.status ?? "pending",
+          ]),
+        ),
+      );
+      setConfirmed(true);
+    } catch (error) {
+      setRsvpError(
+        error instanceof Error ? error.message : "Unable to submit your RSVP.",
+      );
+    } finally {
+      setSubmittingRsvp(false);
+    }
   };
 
   return (
@@ -716,46 +856,71 @@ export default function WeddingInvitation() {
             <div className="wedding-rule reveal" />
             <p className="reveal text-shadow-wedding my-1.5 mb-[18px] text-[17px] tracking-[0.04em] text-[var(--ink-soft)]">
               Number of invitees:{" "}
-              <b className="font-semibold text-[var(--ink)]">2</b>
+              <b className="font-semibold text-[var(--ink)]">
+                {invitees.length}
+              </b>
             </p>
-            <div className="reveal space-y-3">
-              {["Joe Sawaya", "Elissa Haddad"].map((guest) => (
-                <div
-                  key={guest}
-                  className="flex items-center justify-between gap-3 border-y border-[rgba(252,246,238,0.16)] py-3 text-left"
-                >
-                  <span className="text-shadow-wedding text-[19px] text-[var(--ink)]">
-                    {guest}
-                  </span>
-                  <div className="flex gap-2">
-                    <RsvpButton
-                      label="Accept"
-                      variant="accept"
-                      active={rsvps[guest] === "accept"}
-                      onClick={() => selectRsvp(guest, "accept")}
-                    />
-                    <RsvpButton
-                      label="Decline"
-                      variant="decline"
-                      active={rsvps[guest] === "decline"}
-                      onClick={() => selectRsvp(guest, "decline")}
-                    />
-                  </div>
+            {invitationLoading ? (
+              <p className="reveal text-shadow-wedding text-[17px] italic text-[var(--ink-soft)]">
+                Loading your invitation...
+              </p>
+            ) : invitationError ? (
+              <p className="reveal text-shadow-wedding text-[17px] italic text-[var(--ink-soft)]">
+                {invitationError}
+              </p>
+            ) : invitees.length > 0 ? (
+              <>
+                <div className="reveal space-y-3">
+                  {invitees.map((invitee) => (
+                    <div
+                      key={invitee.id}
+                      className="flex items-center justify-between gap-3 border-y border-[rgba(252,246,238,0.16)] py-3 text-left"
+                    >
+                      <span className="text-shadow-wedding text-[19px] text-[var(--ink)]">
+                        {invitee.fullName ?? "Guest"}
+                      </span>
+                      <div className="flex gap-2">
+                        <RsvpButton
+                          label="Accept"
+                          variant="accept"
+                          active={rsvps[invitee.id] === "accepted"}
+                          onClick={() => selectRsvp(invitee.id, "accepted")}
+                        />
+                        <RsvpButton
+                          label="Decline"
+                          variant="decline"
+                          active={rsvps[invitee.id] === "rejected"}
+                          onClick={() => selectRsvp(invitee.id, "rejected")}
+                        />
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-            <button
-              className="reveal mt-[30px] inline-flex cursor-pointer items-center justify-center whitespace-nowrap rounded-[2px] border border-[var(--gold-line)] bg-white/[0.04] px-[26px] py-[13px] font-serif-wedding text-base uppercase tracking-[0.12em] text-[var(--ink)] transition duration-300 hover:border-[var(--ink)] hover:bg-white/[0.14] active:scale-95"
-              type="button"
-              onClick={() => setConfirmed(true)}
-            >
-              Press to Confirm
-            </button>
-            <p
-              className={`text-shadow-wedding mt-5 min-h-6 text-lg italic text-[var(--gold)] transition-opacity duration-500 ${confirmed ? "opacity-100" : "opacity-0"}`}
-            >
-              Thank you. Your response has been noted ♡
-            </p>
+                <button
+                  className="reveal mt-[30px] inline-flex cursor-pointer items-center justify-center whitespace-nowrap rounded-[2px] border border-[var(--gold-line)] bg-white/[0.04] px-[26px] py-[13px] font-serif-wedding text-base uppercase tracking-[0.12em] text-[var(--ink)] transition duration-300 hover:border-[var(--ink)] hover:bg-white/[0.14] active:scale-95 disabled:cursor-not-allowed disabled:opacity-60"
+                  type="button"
+                  onClick={submitRsvps}
+                  disabled={submittingRsvp}
+                >
+                  {submittingRsvp ? "Confirming..." : "Press to Confirm"}
+                </button>
+                {rsvpError ? (
+                  <p className="text-shadow-wedding mt-5 min-h-6 text-lg italic text-[var(--ink-soft)]">
+                    {rsvpError}
+                  </p>
+                ) : (
+                  <p
+                    className={`text-shadow-wedding mt-5 min-h-6 text-lg italic text-[var(--gold)] transition-opacity duration-500 ${confirmed ? "opacity-100" : "opacity-0"}`}
+                  >
+                    Thank you. Your response has been noted ♡
+                  </p>
+                )}
+              </>
+            ) : (
+              <p className="reveal text-shadow-wedding text-[17px] italic text-[var(--ink-soft)]">
+                No invitation code was provided.
+              </p>
+            )}
           </div>
         </section>
 
