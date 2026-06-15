@@ -15,11 +15,11 @@ function getSiteUrl() {
 }
 
 const siteUrl = getSiteUrl();
-const coverImageUrl = new URL("/uploads/whatsapp-cover.jpg", siteUrl).toString();
+const coverImageUrl = new URL("/uploads/IMG_0234.JPEG", siteUrl).toString();
 const previewImage = {
   url: coverImageUrl,
-  width: 1200,
-  height: 630,
+  width: 576,
+  height: 1024,
   alt: "Joe and Elissa wedding invitation",
   type: "image/jpeg",
 };
