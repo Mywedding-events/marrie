@@ -2,7 +2,19 @@ import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 import "./globals.css";
 
-const siteUrl = new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://mywedding.events");
+function getSiteUrl() {
+  const configuredUrl =
+    process.env.NEXT_PUBLIC_SITE_URL ??
+    process.env.VERCEL_PROJECT_PRODUCTION_URL ??
+    process.env.VERCEL_URL ??
+    "https://mywedding.events";
+
+  return new URL(
+    configuredUrl.startsWith("http") ? configuredUrl : `https://${configuredUrl}`,
+  );
+}
+
+const siteUrl = getSiteUrl();
 const coverImageUrl = new URL("/uploads/whatsapp-cover.jpg", siteUrl).toString();
 const previewImage = {
   url: coverImageUrl,
@@ -17,13 +29,17 @@ export const metadata: Metadata = {
   title: "Joe & Elissa - Wedding Invitation",
   description:
     "Wedding invitation for Joe and Elissa on Sunday, August 16, 2026.",
+  alternates: {
+    canonical: siteUrl,
+  },
   openGraph: {
     title: "Joe & Elissa - Wedding Invitation",
     description:
       "Wedding invitation for Joe and Elissa on Sunday, August 16, 2026.",
-    url: siteUrl,
+    url: siteUrl.toString(),
     siteName: "Joe & Elissa Wedding Invitation",
     type: "website",
+    locale: "en_US",
     images: [previewImage],
   },
   twitter: {
@@ -55,7 +71,7 @@ export default function RootLayout({
           crossOrigin="anonymous"
         />
         <link
-          href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Libre+Baskerville:wght@400;700&display=swap"
           rel="stylesheet"
         />
       </head>

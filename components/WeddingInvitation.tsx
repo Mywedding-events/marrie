@@ -820,13 +820,13 @@ export default function WeddingInvitation({
                 <div className="mb-2 text-[22px] font-semibold tracking-[0.06em] text-[var(--ink)]">
                   UAE Emirates NBD
                 </div>
-                <p className="text-[17px] leading-8 tracking-[0.04em] text-[var(--ink)]">
+                <p className="font-registry-numbers text-[16px] leading-8 text-(--ink)">
                   Joe Antoine Sawaya
                 </p>
-                <p className="text-[17px] leading-8 tracking-[0.04em] text-[var(--ink)]">
+                <p className="font-registry-numbers text-[16px] leading-8 text-(--ink)">
                   Ac #0125846129002
                 </p>
-                <p className="text-[17px] leading-8 tracking-[0.04em] text-[var(--ink)]">
+                <p className="font-registry-numbers text-[16px] leading-8 text-(--ink)">
                   IBAN AE10 0260 0001 2584 6129 002
                 </p>
               </div>
@@ -835,7 +835,7 @@ export default function WeddingInvitation({
                 <div className="mb-2 text-[22px] font-semibold tracking-[0.06em] text-[var(--ink)]">
                   Whish Money
                 </div>
-                <p className="whitespace-pre-line text-[17px] leading-8 tracking-[0.04em] text-[var(--ink)]">
+                <p className="font-registry-numbers whitespace-pre-line text-[16px] leading-8 text-(--ink)">
                   Account ID: 10218001-03{`\n`}Phone number: +971 558951417
                 </p>
               </div>
