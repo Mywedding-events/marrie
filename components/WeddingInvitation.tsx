@@ -826,7 +826,7 @@ export default function WeddingInvitation({
                 <p className="font-registry-numbers text-[clamp(15px,4vw,17px)] leading-7 tracking-[0.04em] text-(--ink) min-[390px]:leading-8">
                   Ac #0125846129002
                 </p>
-                <p className="font-registry-numbers text-[clamp(15px,4vw,17px)] leading-7 tracking-[0.04em] text-(--ink) min-[390px]:leading-8">
+                <p className="font-registry-numbers whitespace-nowrap text-[clamp(11px,3.35vw,16px)] leading-7 tracking-[0.01em] text-(--ink) min-[390px]:leading-8">
                   IBAN AE10 0260 0001 2584 6129 002
                 </p>
               </div>
