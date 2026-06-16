@@ -644,11 +644,11 @@ export default function WeddingInvitation({
         ))}
       </div>
       <div
-        className="pointer-events-none fixed inset-0 z-[1] bg-[linear-gradient(180deg,rgba(44,28,18,0.52)_0%,rgba(48,30,20,0.40)_40%,rgba(40,24,16,0.58)_100%)] before:absolute before:inset-0 before:bg-[radial-gradient(130%_100%_at_50%_0%,rgba(58,38,24,0.20),transparent_45%)] after:absolute after:inset-0 after:bg-[radial-gradient(120%_120%_at_50%_120%,rgba(40,24,14,0.65),transparent_55%)]"
+        className="pointer-events-none fixed inset-0 z-[1] bg-[linear-gradient(180deg,rgba(44,28,18,0.30)_0%,rgba(48,30,20,0.22)_40%,rgba(40,24,16,0.34)_100%)] before:absolute before:inset-0 before:bg-[radial-gradient(130%_100%_at_50%_0%,rgba(58,38,24,0.12),transparent_45%)] after:absolute after:inset-0 after:bg-[radial-gradient(120%_120%_at_50%_120%,rgba(40,24,14,0.38),transparent_55%)]"
         aria-hidden="true"
       />
       <div
-        className="pointer-events-none fixed inset-0 z-[1] shadow-[inset_0_0_220px_40px_rgba(30,18,10,0.55)]"
+        className="pointer-events-none fixed inset-0 z-[1] shadow-[inset_0_0_180px_25px_rgba(30,18,10,0.32)]"
         aria-hidden="true"
       />
 
