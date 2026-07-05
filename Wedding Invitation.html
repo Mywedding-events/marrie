@@ -3,15 +3,16 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-<title>Antonio &amp; Nancy — Wedding Invitation</title>
+<title>Ramy &amp; Mary — Wedding Invitation</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Gulzar&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet" />
 <script src="image-slot.js"></script>
 <style>
   :root{
-    --script: 'Great Vibes', cursive;
-    --serif: 'Cormorant Garamond', Georgia, serif;
+    --script: 'CitadelScriptPro', 'Great Vibes', cursive;
+    --serif: 'BauerBodoniPro-Roman', 'Cormorant Garamond', Georgia, serif;
+    --body-serif: 'Gulzar', 'Gulzar-Regular', 'Cormorant Garamond', Georgia, serif;
     --cream: #fbf3e9;
     --ink: #fcf6ee;
     --ink-soft: rgba(252,246,238,0.82);
@@ -88,7 +89,7 @@
     font-size:13px; letter-spacing:.42em; text-transform:uppercase;
     color:var(--ink-soft); font-weight:500; text-shadow:var(--shadow-text);
   }
-  .verse{ font-style:italic; font-size:clamp(19px,5.2vw,22px); line-height:1.7; color:var(--ink); text-shadow:var(--shadow-text); }
+  .verse{ font-family:var(--body-serif); font-size:17px; line-height:1.7; color:var(--ink); text-shadow:var(--shadow-text); }
   .lead{ font-size:clamp(18px,4.8vw,21px); line-height:1.75; color:var(--ink); text-shadow:var(--shadow-text); }
   .lead.italic{ font-style:italic; color:var(--ink-soft); }
   .small{ font-size:15px; letter-spacing:.04em; color:var(--ink-soft); text-shadow:var(--shadow-text); }
@@ -173,13 +174,13 @@
 
   <!-- Fixed background slideshow -->
   <div class="bg-stage" id="bgStage">
-    <img class="active" src="uploads/IMG_0234.JPEG" alt="" />
-    <img src="uploads/IMG_0233.JPEG" alt="" />
-    <img src="uploads/IMG_0236.JPEG" alt="" />
-    <img src="uploads/IMG_0235.JPEG" alt="" />
-    <img src="uploads/IMG_0239.JPEG" alt="" />
-    <img src="uploads/IMG_0238.JPEG" alt="" />
-    <img src="uploads/IMG_0223.JPEG" alt="" />
+    <img class="active" src="uploads/1.JPEG" alt="" />
+    <img src="uploads/2.JPEG" alt="" />
+    <img src="uploads/3.JPEG" alt="" />
+    <img src="uploads/4.JPEG" alt="" />
+    <img src="uploads/5.JPEG" alt="" />
+    <img src="uploads/6.JPEG" alt="" />
+    <img src="uploads/7.JPEG" alt="" />
   </div>
   <div class="overlay"></div>
   <div class="vignette"></div>
@@ -189,19 +190,13 @@
   <audio id="bgm" loop data-src="wedding-music.mp3"></audio>
 
   <main>
-    <!-- 1 — Names + countdown -->
+    <!-- 1 — Cover intro -->
     <section id="s1" data-screen-label="01 Welcome">
       <div class="panel">
-        <div class="eyebrow reveal">Together with their families</div>
-        <h1 class="script names reveal d1">Joe &amp; Elissa</h1>
+        <h1 class="script names reveal d1" style="font-size:clamp(48px,13vw,50px);">We are getting married</h1>
+        <p class="lead reveal d1" style="font-family:var(--serif); font-size:clamp(58px,18vw,66px); line-height:1; letter-spacing:.08em;">MR</p>
         <div class="rule reveal d1"></div>
-        <p class="small reveal d2" style="letter-spacing:.18em; text-transform:uppercase;">SUNDAY · AUGUST 16 · 2026</p>
-        <div class="countdown reveal d3" id="countdown" style="margin-top:34px;">
-          <div class="cd-unit"><span class="cd-num" id="cd-d">00</span><span class="cd-label">Days</span></div>
-          <div class="cd-unit"><span class="cd-num" id="cd-h">00</span><span class="cd-label">Hours</span></div>
-          <div class="cd-unit"><span class="cd-num" id="cd-m">00</span><span class="cd-label">Mins</span></div>
-          <div class="cd-unit"><span class="cd-num" id="cd-s">00</span><span class="cd-label">Secs</span></div>
-        </div>
+        <p class="small reveal d2" style="font-family:var(--body-serif); letter-spacing:.04em;">Sunday, August 23,2026</p>
       </div>
       <div class="cue" id="cue">
         <span>Scroll</span>
@@ -212,14 +207,11 @@
     <!-- 2 — Invitation + verse -->
     <section id="s2" data-screen-label="02 Invitation">
       <div class="panel">
-        <p class="verse reveal">"So they are no longer two, but one flesh. Therefore what God has joined together, let no one separate."</p>
-        <p class="small reveal d1" style="margin-top:10px; letter-spacing:.16em;">— Mathew 19:6 —</p>
+        <p class="verse reveal">"And so we know and rely on the love God has for us. God is love. Whoever lives in love lives in God, and God in them" - 1 John 4:16</p>
         <div class="rule reveal d1"></div>
-        <p class="lead reveal d2">Joe &amp; Elissa </p>
-        <p class="lead reveal d2" style="font-weight:600;">Together with our families</p>
-        <p class="lead reveal d3">Together with our families joyfully invite you to celebrate with us our big day. </p>
-        <h2 class="script names reveal d4" style="font-size:clamp(48px,13vw,72px); margin:.18em 0 .55em;">Joe &amp; Elissa</h2>
-        <p class="lead reveal d4">Sunday, 16 August 2026</p>
+        <h2 class="script names reveal d4" style="font-size:clamp(42px,11vw,50px); margin:.18em 0 .35em;">Ramy Karam<br />&amp;<br />Mary Haddad</h2>
+        <p class="lead reveal d3" style="font-family:var(--body-serif); font-size:17px;">With joyful hearts, together with our families, invite you to celebrate our love and witness our marriage.</p>
+        <p class="lead reveal d4" style="font-family:var(--body-serif); font-size:17px;">Sunday, August 23,2026</p>
       </div>
     </section>
 
@@ -232,20 +224,20 @@
           <rect x="6" y="9" width="28" height="25" rx="3" stroke="currentColor" stroke-width="1.4"/>
           <path d="M6 16h28M13 5v7M27 5v7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
         </svg>
-        <p class="lead reveal d1" style="margin-top:6px; letter-spacing:.04em;">5:30 PM </p>
+        <p class="lead reveal d1" style="font-family:var(--body-serif); font-size:17px; margin-top:6px; letter-spacing:.04em;">Sunday, August 23,2026</p>
         <svg class="ico reveal d2" width="40" height="44" viewBox="0 0 40 44" fill="none" style="margin-top:30px;">
           <path d="M20 3C12.8 3 7 8.8 7 16c0 9 13 24 13 24s13-15 13-24c0-7.2-5.8-13-13-13z" stroke="currentColor" stroke-width="1.4"/>
           <circle cx="20" cy="16" r="4.5" stroke="currentColor" stroke-width="1.4"/>
         </svg>
-        <p class="lead reveal d2" style="font-weight:600; margin-top:4px;">Saydet Al Intikal Church</p>
-        <p class="lead reveal d2">Achrafieh</p>
+        <p class="lead reveal d2" style="font-family:var(--serif); font-size:22px; margin-top:4px;">Saint Georges church - Kfour</p>
+        <p class="lead reveal d2" style="font-family:var(--serif); font-size:22px;">5:30 PM</p>
         <a class="btn reveal d3" id="mapBtn" style="margin-top:22px;" target="_blank" rel="noopener"
-           href="https://www.google.com/maps/search/?api=1&query=Dar+El+Mir+Beit+Ed-Dine+Lebanon">CHURCH LOCATION</a>
+           href="https://www.google.com/maps/search/?api=1&query=Saint+Georges+church+Kfour">Church Location</a>
         <div class="rule reveal d4"></div>
-        <p class="lead italic reveal d4">Followed by Reception &amp; Dinner</p>
-        <p class="lead reveal d4" style="font-weight:600; margin-top:14px;">Jardin De Stone</p>
+        <p class="lead reveal d4" style="font-family:var(--serif); font-size:22px; margin-top:14px;">Hotel Francis - Ghineh</p>
+        <p class="lead reveal d4" style="font-family:var(--serif); font-size:22px;">7:00 PM</p>
         <a class="btn reveal d4" style="margin-top:18px;" target="_blank" rel="noopener"
-           href="https://www.google.com/maps/search/?api=1&query=Jardin+De+Stone+Lebanon">Venue Location</a>
+           href="https://www.google.com/maps/search/?api=1&query=Hotel+Francis+Ghineh">Venue Location</a>
       </div>
     </section>
 
@@ -254,19 +246,12 @@
       <div class="panel">
         <h2 class="script heading reveal">Gift Registry</h2>
         <div class="rule reveal d1"></div>
-        <p class="lead italic reveal d1">Your presence is enough of a present to us! 
-For those who desire, a registry is available at: </p>
+        <p class="lead reveal d1" style="font-family:var(--serif); font-size:17px;">Your presence is the greatest gift we could ask for.</p>
+        <p class="lead reveal d1" style="font-family:var(--serif); font-size:17px;">For those who wish, our wedding registry is available at Whish Money:</p>
         <div class="reg-block reveal d2" style="margin-top:30px;">
-          <div class="reg-bank">UAE Emirates NBD</div>
-          <p class="reg-line">Joe Antoine Sawaya</p>
-          <p class="reg-line">Ac #0125846129002</p>
-          <p class="reg-line iban-line">IBAN AE10 0260 0001 2584 6129 002</p>
-        </div>
-        <div class="diamond reveal d3" style="margin:24px auto;"></div>
-        <div class="reg-block reveal d3">
-          <div class="reg-bank">Whish Money</div>
-          <p class="reg-line">Account ID: 10218001-03
-Phone number: +971 558951417</p>
+          <p class="reg-line">Wedding Account: 20359232-03</p>
+          <p class="reg-line">or</p>
+          <p class="reg-line">Phone numbers: 70 270 760 / 71 962 885</p>
         </div>
       </div>
     </section>
@@ -274,27 +259,27 @@ Phone number: +971 558951417</p>
     <!-- 5 — RSVP -->
     <section id="s5" data-screen-label="05 RSVP">
       <div class="panel">
-        <h2 class="script heading reveal">Kindly RSVP</h2>
-        <p class="small reveal d1" style="letter-spacing:.14em; margin-top:6px;">Please confirm by July 15, 2026</p>
+        <h2 class="script heading reveal" style="font-size:clamp(30px,8vw,38px);">We would be honored by your presence!</h2>
+        <p class="small reveal d1" style="font-family:var(--serif); letter-spacing:.04em; margin-top:6px;">Appreciate your kind reply before 9 August 2026.</p>
         <div class="rule reveal d1"></div>
-        <p class="rsvp-count reveal d2">Number of invitees: <b>2</b></p>
+        <p class="rsvp-count reveal d2">Number of guests: <b>2</b></p>
         <div class="reveal d2">
           <div class="rsvp-row">
-            <span class="rsvp-name">Joe Sawaya</span>
+            <span class="rsvp-name">Guest Name</span>
             <div class="rsvp-actions" data-guest>
               <button class="btn btn-sm" data-rsvp="accept">Accept</button>
               <button class="btn btn-sm" data-rsvp="decline">Decline</button>
             </div>
           </div>
           <div class="rsvp-row">
-            <span class="rsvp-name">Elissa Haddad</span>
+            <span class="rsvp-name">Guest Name</span>
             <div class="rsvp-actions" data-guest>
               <button class="btn btn-sm" data-rsvp="accept">Accept</button>
               <button class="btn btn-sm" data-rsvp="decline">Decline</button>
             </div>
           </div>
         </div>
-        <button class="btn reveal d3" id="confirmBtn" style="margin-top:30px;">Press to Confirm</button>
+        <button class="btn reveal d3" id="confirmBtn" style="margin-top:30px;">Press to confirm</button>
         <p class="rsvp-msg" id="rsvpMsg">Thank you — your response has been noted ♡</p>
       </div>
     </section>
@@ -303,10 +288,10 @@ Phone number: +971 558951417</p>
     <section id="s6" data-screen-label="06 Together">
       <div class="panel" style="display:flex; flex-direction:column; align-items:center;">
         <div class="polaroid reveal">
-          <img src="uploads/IMG_0233.JPEG" alt="Antonio and Nancy" style="display:block; width:100%; height:340px; object-fit:cover; object-position:center 25%; border-radius:2px;" />
+          <img src="uploads/2.JPEG" alt="Ramy and Mary" style="display:block; width:100%; height:340px; object-fit:cover; object-position:center 25%; border-radius:2px;" />
           <div class="cap">♡ Together forever ♡</div>
         </div>
-        <h2 class="script reveal d2" style="font-size:clamp(46px,13vw,62px); margin-top:36px;">See you there</h2>
+        <h2 class="script reveal d2" style="font-size:clamp(46px,13vw,62px); margin-top:36px;">We can't wait to celebrate with you.</h2>
       </div>
     </section>
   </main>
@@ -324,22 +309,6 @@ Phone number: +971 558951417</p>
     bgIdx = (bgIdx + 1) % slides.length;
     slides[bgIdx].classList.add('active');
   }, 3000);
-
-  /* ---------- Countdown ---------- */
-  var target = new Date('2026-08-16T17:30:00').getTime();
-  var elD = document.getElementById('cd-d'), elH = document.getElementById('cd-h'),
-      elM = document.getElementById('cd-m'), elS = document.getElementById('cd-s');
-  function pad(n){ return (n<10?'0':'') + n; }
-  function tick(){
-    var diff = target - Date.now();
-    if(diff < 0) diff = 0;
-    var s = Math.floor(diff/1000);
-    elD.textContent = pad(Math.floor(s/86400));
-    elH.textContent = pad(Math.floor((s%86400)/3600));
-    elM.textContent = pad(Math.floor((s%3600)/60));
-    elS.textContent = pad(s%60);
-  }
-  tick(); setInterval(tick, 1000);
 
   /* ---------- Reveal on scroll + active section ---------- */
   var sections = Array.prototype.slice.call(document.querySelectorAll('main section'));

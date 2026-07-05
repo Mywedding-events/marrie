@@ -1,9 +1,11 @@
 @import "tailwindcss";
 
 :root {
-  --script: "Great Vibes", cursive;
-  --serif: "Cormorant Garamond", Georgia, serif;
-  --registry-number-serif: "Libre Baskerville", Georgia, serif;
+  --script: "CitadelScriptPro", "Great Vibes", cursive;
+  --serif: "BauerBodoniPro-Roman", "Cormorant Garamond", Georgia, serif;
+  --body-serif: "Gulzar", "Gulzar-Regular", "Cormorant Garamond", Georgia, serif;
+  --registry-number-serif: "BauerBodoniPro-Roman", "Libre Baskerville", Georgia,
+    serif;
   --cream: #fbf3e9;
   --ink: #fcf6ee;
   --ink-soft: rgba(252, 246, 238, 0.82);
@@ -46,6 +48,10 @@ a {
 
 .font-serif-wedding {
   font-family: var(--serif);
+}
+
+.font-body-wedding {
+  font-family: var(--body-serif);
 }
 
 .font-registry-numbers {

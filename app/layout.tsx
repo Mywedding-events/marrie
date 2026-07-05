@@ -1,5 +1,10 @@
+import { existsSync } from "node:fs";
 import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
+import {
+  getImageMimeType,
+  supportedImageExtensions,
+} from "../lib/imageFormats";
 import "./globals.css";
 
 function getSiteUrl() {
@@ -15,38 +20,46 @@ function getSiteUrl() {
 }
 
 const siteUrl = getSiteUrl();
-const coverImageUrl = new URL("/uploads/IMG_0234.JPEG", siteUrl).toString();
+const coverImagePath = (() => {
+  const extension =
+    supportedImageExtensions.find((extension) =>
+      existsSync(`${process.cwd()}/public/uploads/1.${extension}`),
+    ) ?? "jpg";
+
+  return `/uploads/1.${extension}`;
+})();
+const coverImageUrl = new URL(coverImagePath, siteUrl).toString();
 const previewImage = {
   url: coverImageUrl,
   width: 576,
   height: 1024,
-  alt: "Joe and Elissa wedding invitation",
-  type: "image/jpeg",
+  alt: "Ramy and Mary wedding invitation",
+  type: getImageMimeType(coverImagePath),
 };
 
 export const metadata: Metadata = {
   metadataBase: siteUrl,
-  title: "Joe & Elissa - Wedding Invitation",
+  title: "Ramy & Mary - Wedding Invitation",
   description:
-    "Wedding invitation for Joe and Elissa on Sunday, August 16, 2026.",
+    "Wedding invitation for Ramy and Mary on Sunday, August 23, 2026.",
   alternates: {
     canonical: siteUrl,
   },
   openGraph: {
-    title: "Joe & Elissa - Wedding Invitation",
+    title: "Ramy & Mary - Wedding Invitation",
     description:
-      "Wedding invitation for Joe and Elissa on Sunday, August 16, 2026.",
+      "Wedding invitation for Ramy and Mary on Sunday, August 23, 2026.",
     url: siteUrl.toString(),
-    siteName: "Joe & Elissa Wedding Invitation",
+    siteName: "Ramy & Mary Wedding Invitation",
     type: "website",
     locale: "en_US",
     images: [previewImage],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Joe & Elissa - Wedding Invitation",
+    title: "Ramy & Mary - Wedding Invitation",
     description:
-      "Wedding invitation for Joe and Elissa on Sunday, August 16, 2026.",
+      "Wedding invitation for Ramy and Mary on Sunday, August 23, 2026.",
     images: [previewImage],
   },
 };
@@ -71,7 +84,7 @@ export default function RootLayout({
           crossOrigin="anonymous"
         />
         <link
-          href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Libre+Baskerville:wght@400;700&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Gulzar&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Libre+Baskerville:wght@400;700&display=swap"
           rel="stylesheet"
         />
       </head>

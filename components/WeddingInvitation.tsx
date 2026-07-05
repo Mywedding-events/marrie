@@ -3,18 +3,13 @@
 import Image from "next/image";
 import type { ReactNode } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  shouldUseUnoptimizedImage,
+  supportedImageExtensions,
+} from "../lib/imageFormats";
 
-const coverImage = "/uploads/IMG_0234.JPEG";
-
-const slides = [
-  coverImage,
-  "/uploads/IMG_0233.JPEG",
-  "/uploads/IMG_0236.JPEG",
-  "/uploads/IMG_0235.JPEG",
-  "/uploads/IMG_0239.JPEG",
-  "/uploads/IMG_0238.JPEG",
-  "/uploads/IMG_0223.JPEG",
-];
+const defaultSlides: string[] = [];
+const uploadCacheKey = Date.now().toString(36);
 
 const slideChromeColors = [
   "#2e5882",
@@ -34,14 +29,6 @@ const sections = [
   "RSVP",
   "Together",
 ];
-const weddingDate = new Date("2026-08-16T17:30:00").getTime();
-
-type Countdown = {
-  days: string;
-  hours: string;
-  mins: string;
-  secs: string;
-};
 
 type RsvpStatus = "pending" | "accepted" | "rejected";
 
@@ -57,19 +44,6 @@ type InvitationResponse = {
 };
 
 const API_BASE_URL = "https://api.mywedding.events";
-
-function getCountdown(): Countdown {
-  const remaining = Math.max(weddingDate - Date.now(), 0);
-  const totalSeconds = Math.floor(remaining / 1000);
-  const pad = (value: number) => value.toString().padStart(2, "0");
-
-  return {
-    days: pad(Math.floor(totalSeconds / 86400)),
-    hours: pad(Math.floor((totalSeconds % 86400) / 3600)),
-    mins: pad(Math.floor((totalSeconds % 3600) / 60)),
-    secs: pad(totalSeconds % 60),
-  };
-}
 
 function CalendarIcon({ className = "" }: { className?: string }) {
   return (
@@ -141,7 +115,7 @@ function ButtonLink({
 }) {
   return (
     <a
-      className={`inline-flex cursor-pointer items-center justify-center whitespace-nowrap rounded-[2px] border border-[var(--gold-line)] bg-white/[0.04] px-[26px] py-[13px] font-serif-wedding text-base uppercase tracking-[0.12em] text-[var(--ink)] no-underline transition duration-300 ease-in-out hover:border-[var(--ink)] hover:bg-white/[0.14] active:scale-95 ${className}`}
+      className={`inline-flex cursor-pointer items-center justify-center whitespace-nowrap rounded-[2px] border border-[var(--gold-line)] bg-white/[0.04] px-[26px] py-[13px] font-body-wedding text-[16px] tracking-[0.08em] text-[var(--ink)] no-underline transition duration-300 ease-in-out hover:border-[var(--ink)] hover:bg-white/[0.14] active:scale-95 ${className}`}
       href={href}
       target="_blank"
       rel="noopener noreferrer"
@@ -164,7 +138,7 @@ function RsvpButton({
 }) {
   return (
     <button
-      className={`inline-flex min-w-[82px] cursor-pointer items-center justify-center rounded-[2px] border px-[13px] py-[9px] font-serif-wedding text-xs uppercase tracking-[0.08em] transition duration-300 active:scale-95 ${
+      className={`inline-flex min-w-[82px] cursor-pointer items-center justify-center rounded-[2px] border px-[13px] py-[9px] font-serif-wedding text-[13px] tracking-[0.06em] transition duration-300 active:scale-95 ${
         active
           ? variant === "accept"
             ? "border-transparent bg-[oklch(0.82_0.075_78/0.9)] font-semibold text-[#3a2615]"
@@ -218,19 +192,64 @@ async function waitForPageAssets(signal: AbortSignal) {
   await Promise.race([ready(), timeout]);
 }
 
+function probeImage(src: string, signal: AbortSignal) {
+  return new Promise<boolean>((resolve) => {
+    if (signal.aborted) {
+      resolve(false);
+      return;
+    }
+
+    const image = new window.Image();
+    let settled = false;
+    const done = (exists: boolean) => {
+      if (settled) return;
+      settled = true;
+      image.onload = null;
+      image.onerror = null;
+      signal.removeEventListener("abort", onAbort);
+      resolve(exists);
+    };
+    const onAbort = () => done(false);
+
+    signal.addEventListener("abort", onAbort, { once: true });
+    image.onload = () => done(true);
+    image.onerror = () => done(false);
+    image.src = src;
+  });
+}
+
+async function findNumberedImage(index: number, signal: AbortSignal) {
+  for (const extension of supportedImageExtensions) {
+    const src = `/uploads/${index}.${extension}?v=${uploadCacheKey}`;
+    if (await probeImage(src, signal)) return src;
+    if (signal.aborted) return null;
+  }
+
+  return null;
+}
+
+async function discoverNumberedSlides(signal: AbortSignal) {
+  const discovered: string[] = [];
+  let index = 1;
+
+  while (!signal.aborted) {
+    const src = await findNumberedImage(index, signal);
+    if (!src) break;
+    discovered.push(src);
+    index += 1;
+  }
+
+  return discovered;
+}
+
 export default function WeddingInvitation({
   invitationCode,
 }: {
   invitationCode?: string;
 }) {
   const [appReady, setAppReady] = useState(false);
+  const [slides, setSlides] = useState(defaultSlides);
   const [activeSlide, setActiveSlide] = useState(0);
-  const [countdown, setCountdown] = useState<Countdown>({
-    days: "00",
-    hours: "00",
-    mins: "00",
-    secs: "00",
-  });
   const [activeSection, setActiveSection] = useState(0);
   const [cueHidden, setCueHidden] = useState(false);
   const [invitees, setInvitees] = useState<Invitee[]>([]);
@@ -248,8 +267,22 @@ export default function WeddingInvitation({
     [],
   );
   const activeChromeColor =
-    slideChromeColors[activeSlide] ?? slideChromeColors[0] ?? "#2e5882";
+    slideChromeColors[activeSlide % slideChromeColors.length] ??
+    slideChromeColors[0] ??
+    "#2e5882";
   const normalizedInvitationCode = invitationCode?.trim();
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    discoverNumberedSlides(controller.signal).then((nextSlides) => {
+      if (controller.signal.aborted) return;
+      setSlides(nextSlides);
+      setActiveSlide((index) => (index < nextSlides.length ? index : 0));
+    });
+
+    return () => controller.abort();
+  }, []);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -266,22 +299,16 @@ export default function WeddingInvitation({
   }, []);
 
   useEffect(() => {
-    if (!appReady) return;
+    if (!appReady || slides.length <= 1) return;
 
     const slideTimer = window.setInterval(() => {
       setActiveSlide((index) => (index + 1) % slides.length);
     }, 3000);
-    setCountdown(getCountdown());
-    const countdownTimer = window.setInterval(
-      () => setCountdown(getCountdown()),
-      1000,
-    );
 
     return () => {
       window.clearInterval(slideTimer);
-      window.clearInterval(countdownTimer);
     };
-  }, [appReady]);
+  }, [appReady, slides.length]);
 
   useEffect(() => {
     if (!appReady) return;
@@ -630,17 +657,31 @@ export default function WeddingInvitation({
         aria-hidden="true"
       >
         {slides.map((slide, index) => (
-          <Image
+          <div
             key={slide}
-            src={slide}
-            alt=""
-            fill
-            priority={index === 0}
-            sizes="100vw"
-            className={`object-cover object-[center_30%] transition-opacity duration-[1600ms] ease-in-out ${
+            className={`absolute inset-0 transition-opacity duration-1600 ease-in-out ${
               activeSlide === index ? "opacity-100" : "opacity-0"
             }`}
-          />
+          >
+            <Image
+              src={slide}
+              alt=""
+              fill
+              priority={index === 0}
+              sizes="100vw"
+              unoptimized={shouldUseUnoptimizedImage(slide)}
+              className="scale-105 object-cover object-[center_30%] brightness-[0.72] saturate-[0.85] blur-[3px] md:scale-110 md:brightness-[0.58] md:blur-[10px]"
+            />
+            <Image
+              src={slide}
+              alt=""
+              fill
+              priority={index === 0}
+              sizes="100vw"
+              unoptimized={shouldUseUnoptimizedImage(slide)}
+              className="hidden object-contain object-center brightness-[0.72] saturate-[0.9] md:block"
+            />
+          </div>
         ))}
       </div>
       <div
@@ -659,36 +700,16 @@ export default function WeddingInvitation({
           data-screen-label="01 Welcome"
         >
           <div className="w-full max-w-[430px]">
-            <h1 className="reveal text-shadow-wedding font-script my-[0.12em] pb-[0.08em] text-[clamp(58px,16vw,88px)] leading-[1.08] text-[var(--ink)]">
-              Joe &amp; Elissa
+            <h1 className="reveal text-shadow-wedding font-script my-[0.12em] pb-[0.08em] text-[clamp(48px,13vw,50px)] leading-[1.08] text-[var(--ink)]">
+              We are getting married
             </h1>
-            <p className="reveal text-shadow-wedding font-serif-wedding text-[clamp(22px,6vw,30px)] italic leading-tight text-(--ink)">
-              Are getting married!
+            <p className="reveal text-shadow-wedding font-serif-wedding text-[clamp(58px,18vw,66px)] leading-none tracking-[0.08em] text-(--ink)">
+              MR
             </p>
             <div className="wedding-rule reveal" />
-            <p className="reveal text-shadow-wedding text-[15px] uppercase tracking-[0.18em] text-[var(--ink-soft)]">
-              Sunday · August 16 · 2026
+            <p className="reveal text-shadow-wedding font-body-wedding text-[17px] tracking-[0.04em] text-[var(--ink-soft)]">
+              Sunday, August 23,2026
             </p>
-            <div className="reveal mt-[34px] flex justify-center gap-3.5">
-              {[
-                ["Days", countdown.days],
-                ["Hours", countdown.hours],
-                ["Mins", countdown.mins],
-                ["Secs", countdown.secs],
-              ].map(([label, value]) => (
-                <div
-                  key={label}
-                  className="flex min-w-[62px] flex-col items-center"
-                >
-                  <span className="text-shadow-wedding [font-variant-numeric:tabular-nums] text-[clamp(40px,11vw,52px)] font-medium leading-none text-[var(--ink)]">
-                    {value}
-                  </span>
-                  <span className="mt-[9px] text-[11px] uppercase tracking-[0.26em] text-[var(--ink-soft)]">
-                    {label}
-                  </span>
-                </div>
-              ))}
-            </div>
           </div>
           <button
             className={`text-shadow-wedding absolute bottom-[46px] left-1/2 flex -translate-x-1/2 cursor-pointer flex-col items-center gap-2 text-[var(--ink-soft)] transition-opacity duration-500 ${cueHidden ? "opacity-0" : "opacity-100"}`}
@@ -726,29 +747,25 @@ export default function WeddingInvitation({
           data-screen-label="02 Invitation"
         >
           <div className="w-full max-w-[430px]">
-            <p className="reveal text-shadow-wedding text-[clamp(19px,5.2vw,22px)] italic leading-[1.7] text-[var(--ink)]">
-              &quot;So they are no longer two, but one flesh. Therefore what God
-              has joined together, let no one separate.&quot;
-            </p>
-            <p className="reveal text-shadow-wedding mt-2.5 text-[15px] tracking-[0.16em] text-[var(--ink-soft)]">
-              — Matthew 19:6 —
+            <p className="reveal text-shadow-wedding font-body-wedding text-[17px] leading-[1.7] text-[var(--ink)]">
+              &quot;And so we know and rely on the love God has for us. God is
+              love. Whoever lives in love lives in God, and God in them&quot; - 1
+              John 4:16
             </p>
             <div className="wedding-rule reveal" />
-            <p className="reveal text-shadow-wedding font-script text-[clamp(42px,11vw,58px)] leading-[1.05] text-(--ink)">
-              Joe Sawaya 
+            <p className="reveal text-shadow-wedding font-script text-[clamp(42px,11vw,50px)] leading-[1.05] text-(--ink)">
+              Ramy Karam
               <br />
               &amp; 
               <br />
-              Elissa Haddad
+              Mary Haddad
             </p>
-            <p className="reveal text-shadow-wedding text-[clamp(18px,4.8vw,21px)] font-semibold leading-[1.75] text-[var(--ink)]">
-              Together with their families
+            <p className="reveal text-shadow-wedding font-body-wedding text-[17px] leading-[1.75] text-[var(--ink)]">
+              With joyful hearts, together with our families, invite you to
+              celebrate our love and witness our marriage.
             </p>
-            <p className="reveal text-shadow-wedding text-[clamp(18px,4.8vw,21px)] leading-[1.75] text-[var(--ink)]">
-              Joyfully invite you to celebrate with them <br /> Their Big Day.
-            </p>
-            <p className="reveal text-shadow-wedding text-[clamp(18px,4.8vw,21px)] leading-[1.75] text-[var(--ink)]">
-              Sunday, 16 August 2026
+            <p className="reveal text-shadow-wedding font-body-wedding text-[17px] leading-[1.75] text-[var(--ink)]">
+              Sunday, August 23,2026
             </p>
           </div>
         </section>
@@ -764,35 +781,32 @@ export default function WeddingInvitation({
             </h2>
             <div className="wedding-rule reveal my-4 max-[380px]:my-3" />
             <CalendarIcon className="reveal mx-auto block h-9 w-9 text-(--ink) drop-shadow-[0_2px_8px_rgba(30,18,10,0.45)] min-[390px]:h-10 min-[390px]:w-10" />
-            <p className="reveal text-shadow-wedding mt-1 text-[clamp(17px,4.6vw,21px)] leading-[1.55] tracking-[0.04em] text-(--ink) min-[390px]:mt-1.5 min-[390px]:leading-[1.75]">
-              August 16 · 5:30 PM
+            <p className="reveal text-shadow-wedding font-body-wedding mt-1 text-[17px] leading-[1.55] tracking-[0.04em] text-(--ink) min-[390px]:mt-1.5 min-[390px]:leading-[1.75]">
+              Sunday, August 23,2026
             </p>
             <LocationIcon className="reveal mx-auto mt-5 block h-10 w-9 text-(--ink) drop-shadow-[0_2px_8px_rgba(30,18,10,0.45)] min-[390px]:mt-[30px] min-[390px]:h-11 min-[390px]:w-10" />
-            <p className="reveal text-shadow-wedding mt-1 text-[clamp(17px,4.6vw,21px)] font-semibold leading-[1.55] text-(--ink) min-[390px]:leading-[1.75]">
-              St. Mary Greek Melkite
+            <p className="reveal text-shadow-wedding mt-1 font-serif-wedding text-[22px] leading-[1.55] text-(--ink) min-[390px]:leading-[1.75]">
+              Saint Georges church - Kfour
             </p>
-            <p className="reveal text-shadow-wedding text-[clamp(17px,4.6vw,21px)] font-semibold leading-[1.55] text-(--ink) min-[390px]:leading-[1.75]">
-              Saydet Al Intikal Church
-            </p>
-            <p className="reveal text-shadow-wedding text-[clamp(17px,4.6vw,21px)] leading-[1.55] text-(--ink) min-[390px]:leading-[1.75]">
-              Achrafieh
+            <p className="reveal text-shadow-wedding font-serif-wedding text-[22px] leading-[1.55] text-(--ink) min-[390px]:leading-[1.75]">
+              5:30 PM
             </p>
             <ButtonLink
               className="reveal mt-4 max-[380px]:px-5 max-[380px]:py-[11px] max-[380px]:text-sm min-[390px]:mt-[22px]"
-              href="https://maps.app.goo.gl/RJ5sp6SmUA84HkZ27?g_st=iw"
+              href="https://maps.app.goo.gl/Y1q1yojDBTncadxZ8?g_st=iw"
             >
               Church Location
             </ButtonLink>
             <div className="wedding-rule reveal my-4 max-[380px]:my-3" />
-            <p className="reveal text-shadow-wedding text-[clamp(17px,4.6vw,21px)] italic leading-[1.55] text-(--ink-soft) min-[390px]:leading-[1.75]">
-              Followed by Reception &amp; Dinner
+            <p className="reveal text-shadow-wedding mt-2.5 font-serif-wedding text-[22px] leading-[1.55] text-(--ink) min-[390px]:mt-3.5 min-[390px]:leading-[1.75]">
+              Hotel Francis - Ghineh
             </p>
-            <p className="reveal text-shadow-wedding mt-2.5 text-[clamp(17px,4.6vw,21px)] font-semibold leading-[1.55] text-(--ink) min-[390px]:mt-3.5 min-[390px]:leading-[1.75]">
-              Jardin De Stone
+            <p className="reveal text-shadow-wedding font-serif-wedding text-[22px] leading-[1.55] text-(--ink) min-[390px]:leading-[1.75]">
+              7:00 PM
             </p>
             <ButtonLink
               className="reveal mt-4 max-[380px]:px-5 max-[380px]:py-[11px] max-[380px]:text-sm min-[390px]:mt-[18px]"
-              href="https://maps.app.goo.gl/xQmbzGiBLydWD1DK9?g_st=iw"
+              href="https://maps.app.goo.gl/TotZ2UsZ6NdsXhQDA?g_st=iw"
             >
               Venue Location
             </ButtonLink>
@@ -810,33 +824,23 @@ export default function WeddingInvitation({
             </h2>
             <div className="wedding-rule reveal my-4 max-[380px]:my-3" />
             <div className="reveal relative w-full overflow-hidden rounded-[3px] border border-(--gold-line) bg-[rgba(76,49,33,0.42)] px-5 py-6 shadow-[0_16px_48px_rgba(24,14,8,0.3)] backdrop-blur-[2px] before:pointer-events-none before:absolute before:inset-[6px] before:border before:border-[rgba(252,246,238,0.16)] min-[390px]:px-6 min-[390px]:py-7 max-[380px]:px-4 max-[380px]:py-5">
-              <p className="relative text-shadow-wedding text-[clamp(17px,4.6vw,21px)] italic leading-[1.55] text-(--ink) min-[390px]:leading-[1.75]">
-                Your presence is enough of a present to us!
-                <br />
-                For those who desire, a registry is available at:
+              <p className="relative text-shadow-wedding font-serif-wedding text-[17px] leading-[1.7] text-(--ink)">
+                Your presence is the greatest gift we could ask for.
+              </p>
+              <p className="relative text-shadow-wedding font-serif-wedding mt-3 text-[17px] leading-[1.7] text-(--ink)">
+                For those who wish, our wedding registry is available at Whish
+                Money:
               </p>
               <div className="wedding-rule relative my-4 min-[390px]:my-5" />
               <div className="relative text-shadow-wedding">
-                <div className="mb-1.5 text-[clamp(19px,5vw,22px)] font-semibold tracking-[0.06em] text-(--ink) min-[390px]:mb-2">
-                  UAE Emirates NBD
-                </div>
-                <p className="font-registry-numbers text-[clamp(15px,4vw,17px)] leading-7 tracking-[0.04em] text-(--ink) min-[390px]:leading-8">
-                  Joe Antoine Sawaya
+                <p className="font-serif-wedding text-[17px] leading-8 text-(--ink)">
+                  Wedding Account: 20359232-03
                 </p>
-                <p className="font-registry-numbers text-[clamp(15px,4vw,17px)] leading-7 tracking-[0.04em] text-(--ink) min-[390px]:leading-8">
-                  Ac #0125846129002
+                <p className="font-serif-wedding text-[17px] leading-8 text-(--ink)">
+                  or
                 </p>
-                <p className="font-registry-numbers whitespace-nowrap text-[clamp(11px,3.35vw,16px)] leading-7 tracking-[0.01em] text-(--ink) min-[390px]:leading-8">
-                  IBAN AE10 0260 0001 2584 6129 002
-                </p>
-              </div>
-              <div className="wedding-diamond relative my-5 min-[390px]:my-6" />
-              <div className="relative text-shadow-wedding">
-                <div className="mb-1.5 text-[clamp(19px,5vw,22px)] font-semibold tracking-[0.06em] text-(--ink) min-[390px]:mb-2">
-                  Whish Money
-                </div>
-                <p className="font-registry-numbers whitespace-pre-line text-[clamp(15px,4vw,17px)] leading-7 tracking-[0.04em] text-(--ink) min-[390px]:leading-8">
-                  Account ID: 10218001-03{`\n`}Phone number: +971 558951417
+                <p className="font-serif-wedding text-[17px] leading-8 text-(--ink)">
+                  Phone numbers: 70 270 760 / 71 962 885
                 </p>
               </div>
             </div>
@@ -849,15 +853,15 @@ export default function WeddingInvitation({
           data-screen-label="05 RSVP"
         >
           <div className="w-full max-w-[430px]">
-            <h2 className="reveal text-shadow-wedding font-script text-[clamp(46px,13vw,64px)] leading-[1.04] text-[var(--ink)]">
-              Kindly RSVP
+            <h2 className="reveal text-shadow-wedding font-script text-[clamp(30px,8vw,38px)] leading-[1.04] text-[var(--ink)]">
+              We would be honored by your presence!
             </h2>
-            <p className="reveal text-shadow-wedding mt-1.5 text-[15px] tracking-[0.14em] text-[var(--ink-soft)]">
-              Please confirm by July 1, 2026
+            <p className="reveal text-shadow-wedding mt-1.5 font-serif-wedding text-[15px] tracking-[0.04em] text-[var(--ink-soft)]">
+              Appreciate your kind reply before 9 August 2026.
             </p>
             <div className="wedding-rule reveal" />
-            <p className="reveal text-shadow-wedding my-1.5 mb-[18px] text-[17px] tracking-[0.04em] text-[var(--ink-soft)]">
-              Number of invitees:{" "}
+            <p className="reveal text-shadow-wedding my-1.5 mb-[18px] font-serif-wedding text-[15px] tracking-[0.04em] text-[var(--ink-soft)]">
+              Number of guests:{" "}
               <b className="font-semibold text-[var(--ink)]">
                 {invitees.length}
               </b>
@@ -878,8 +882,8 @@ export default function WeddingInvitation({
                       key={invitee.id}
                       className="flex items-center justify-between gap-3 border-y border-[rgba(252,246,238,0.16)] py-3 text-left"
                     >
-                      <span className="text-shadow-wedding text-[19px] text-[var(--ink)]">
-                        {invitee.fullName ?? "Guest"}
+                      <span className="text-shadow-wedding font-serif-wedding text-[15px] text-[var(--ink)]">
+                        {invitee.fullName ?? "Guest Name"}
                       </span>
                       <div className="flex gap-2">
                         <RsvpButton
@@ -899,12 +903,12 @@ export default function WeddingInvitation({
                   ))}
                 </div>
                 <button
-                  className="reveal mt-[30px] inline-flex cursor-pointer items-center justify-center whitespace-nowrap rounded-[2px] border border-[var(--gold-line)] bg-white/[0.04] px-[26px] py-[13px] font-serif-wedding text-base uppercase tracking-[0.12em] text-[var(--ink)] transition duration-300 hover:border-[var(--ink)] hover:bg-white/[0.14] active:scale-95 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="reveal mt-[30px] inline-flex cursor-pointer items-center justify-center whitespace-nowrap rounded-[2px] border border-[var(--gold-line)] bg-white/[0.04] px-[26px] py-[13px] font-serif-wedding text-[13px] tracking-[0.06em] text-[var(--ink)] transition duration-300 hover:border-[var(--ink)] hover:bg-white/[0.14] active:scale-95 disabled:cursor-not-allowed disabled:opacity-60"
                   type="button"
                   onClick={submitRsvps}
                   disabled={submittingRsvp}
                 >
-                  {submittingRsvp ? "Confirming..." : "Press to Confirm"}
+                  {submittingRsvp ? "Confirming..." : "Press to confirm"}
                 </button>
                 {rsvpError ? (
                   <p className="text-shadow-wedding mt-5 min-h-6 text-lg italic text-[var(--ink-soft)]">
@@ -933,7 +937,7 @@ export default function WeddingInvitation({
         >
           <div className="flex w-full max-w-[430px] flex-col items-center">
             <h2 className="reveal text-shadow-wedding font-script text-[clamp(46px,13vw,62px)] leading-[1.04] text-[var(--ink)]">
-              See you there!
+              We can&apos;t wait to celebrate with you.
             </h2>
           </div>
         </section>
