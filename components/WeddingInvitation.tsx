@@ -12,13 +12,13 @@ const defaultSlides: string[] = [];
 const uploadCacheKey = Date.now().toString(36);
 
 const slideChromeColors = [
-  "#2e5882",
-  "#294f7b",
-  "#31537c",
-  "#335a84",
-  "#245081",
-  "#204e81",
-  "#355983",
+  "#b7410e",
+  "#a83a12",
+  "#c14918",
+  "#9f3010",
+  "#ba3d13",
+  "#8f2c0d",
+  "#c6541f",
 ];
 
 const sections = [
@@ -269,7 +269,7 @@ export default function WeddingInvitation({
   const activeChromeColor =
     slideChromeColors[activeSlide % slideChromeColors.length] ??
     slideChromeColors[0] ??
-    "#2e5882";
+    "#b7410e";
   const normalizedInvitationCode = invitationCode?.trim();
 
   useEffect(() => {

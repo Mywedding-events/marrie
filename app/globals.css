@@ -11,7 +11,7 @@
   --ink-soft: rgba(252, 246, 238, 0.82);
   --gold: oklch(0.82 0.075 78);
   --gold-line: oklch(0.86 0.06 80 / 0.55);
-  --slide-chrome-color: #2e5882;
+  --slide-chrome-color: #b7410e;
   --shadow-text:
     0 1px 18px rgba(30, 18, 10, 0.55), 0 1px 3px rgba(30, 18, 10, 0.4);
 }
