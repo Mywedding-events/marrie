@@ -703,9 +703,16 @@ export default function WeddingInvitation({
             <h1 className="reveal text-shadow-wedding font-script my-[0.12em] pb-[0.08em] text-[clamp(48px,13vw,50px)] leading-[1.08] text-[var(--ink)]">
               We are getting married
             </h1>
-            <p className="reveal text-shadow-wedding font-serif-wedding text-[clamp(58px,18vw,66px)] leading-none tracking-[0.08em] text-(--ink)">
-              MR
-            </p>
+            <div className="reveal flex justify-center">
+              <Image
+                src="/mr-logo.png"
+                alt="MR monogram"
+                width={500}
+                height={500}
+                priority
+                className="h-[clamp(86px,26vw,120px)] w-[clamp(180px,54vw,250px)] object-contain drop-shadow-[0_3px_10px_rgba(30,18,10,0.42)]"
+              />
+            </div>
             <div className="wedding-rule reveal" />
             <p className="reveal text-shadow-wedding font-body-wedding text-[17px] tracking-[0.04em] text-[var(--ink-soft)]">
               Sunday, August 23,2026
