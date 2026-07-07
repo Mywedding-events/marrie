@@ -1,10 +1,5 @@
-import { existsSync } from "node:fs";
 import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
-import {
-  getImageMimeType,
-  supportedImageExtensions,
-} from "../lib/imageFormats";
 import "./globals.css";
 
 function getSiteUrl() {
@@ -20,21 +15,14 @@ function getSiteUrl() {
 }
 
 const siteUrl = getSiteUrl();
-const coverImagePath = (() => {
-  const extension =
-    supportedImageExtensions.find((extension) =>
-      existsSync(`${process.cwd()}/public/uploads/1.${extension}`),
-    ) ?? "jpg";
-
-  return `/uploads/1.${extension}`;
-})();
+const coverImagePath = "/uploads/whatsapp-cover.jpg";
 const coverImageUrl = new URL(coverImagePath, siteUrl).toString();
 const previewImage = {
   url: coverImageUrl,
-  width: 576,
-  height: 1024,
+  width: 1200,
+  height: 630,
   alt: "Ramy and Mary wedding invitation",
-  type: getImageMimeType(coverImagePath),
+  type: "image/jpeg",
 };
 
 export const metadata: Metadata = {
