@@ -772,7 +772,7 @@ export default function WeddingInvitation({
               John 4:16
             </p>
             <div className="wedding-rule reveal" />
-            <p className="reveal text-shadow-wedding font-script text-[clamp(42px,11vw,50px)] leading-[1.05] text-(--ink)">
+            <p className="reveal text-shadow-wedding mb-4 font-script text-[clamp(42px,11vw,50px)] leading-[1.05] text-(--ink)">
               Ramy Karam
               <br />
               &amp; 
