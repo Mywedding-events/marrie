@@ -3,10 +3,7 @@
 import Image from "next/image";
 import type { ReactNode } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
-import {
-  shouldUseUnoptimizedImage,
-  supportedImageExtensions,
-} from "../lib/imageFormats";
+import { supportedImageExtensions } from "../lib/imageFormats";
 
 const defaultSlides: string[] = [];
 const uploadCacheKey = Date.now().toString(36);
@@ -212,7 +209,12 @@ function probeImage(src: string, signal: AbortSignal) {
     const onAbort = () => done(false);
 
     signal.addEventListener("abort", onAbort, { once: true });
-    image.onload = () => done(true);
+    image.onload = () => {
+      image
+        .decode()
+        .catch(() => undefined)
+        .then(() => done(true));
+    };
     image.onerror = () => done(false);
     image.src = src;
   });
@@ -228,7 +230,10 @@ async function findNumberedImage(index: number, signal: AbortSignal) {
   return null;
 }
 
-async function discoverNumberedSlides(signal: AbortSignal) {
+async function discoverNumberedSlides(
+  signal: AbortSignal,
+  onSlideReady: (src: string) => void,
+) {
   const discovered: string[] = [];
   let index = 1;
 
@@ -236,6 +241,7 @@ async function discoverNumberedSlides(signal: AbortSignal) {
     const src = await findNumberedImage(index, signal);
     if (!src) break;
     discovered.push(src);
+    onSlideReady(src);
     index += 1;
   }
 
@@ -275,9 +281,15 @@ export default function WeddingInvitation({
   useEffect(() => {
     const controller = new AbortController();
 
-    discoverNumberedSlides(controller.signal).then((nextSlides) => {
+    setSlides([]);
+    setActiveSlide(0);
+    discoverNumberedSlides(controller.signal, (src) => {
       if (controller.signal.aborted) return;
-      setSlides(nextSlides);
+      setSlides((currentSlides) =>
+        currentSlides.includes(src) ? currentSlides : [...currentSlides, src],
+      );
+    }).then((nextSlides) => {
+      if (controller.signal.aborted) return;
       setActiveSlide((index) => (index < nextSlides.length ? index : 0));
     });
 
@@ -669,7 +681,7 @@ export default function WeddingInvitation({
               fill
               priority={index === 0}
               sizes="100vw"
-              unoptimized={shouldUseUnoptimizedImage(slide)}
+              unoptimized
               className="scale-105 object-cover object-[center_30%] brightness-[0.72] saturate-[0.85] blur-[3px] md:scale-110 md:brightness-[0.58] md:blur-[10px]"
             />
             <Image
@@ -678,7 +690,7 @@ export default function WeddingInvitation({
               fill
               priority={index === 0}
               sizes="100vw"
-              unoptimized={shouldUseUnoptimizedImage(slide)}
+              unoptimized
               className="hidden object-contain object-center brightness-[0.72] saturate-[0.9] md:block"
             />
           </div>
